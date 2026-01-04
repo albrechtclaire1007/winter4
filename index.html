@@ -15,12 +15,11 @@
     html, body { height:100%; margin:0; }
     body{
       background:#eaf2ff url("https://i.postimg.cc/BbCyMf2N/winter-background.png") no-repeat center top;
-      background-size:contain;   /* fully visible */
+      background-size:contain;
       overflow:hidden;
       font-family:"Louisville", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
-    /* shared */
     .screen{
       position:absolute;
       inset:0;
@@ -29,17 +28,25 @@
     .screen.active{ display:block; }
 
     /* top menu buttons (center top) */
-    .topBtns{
+    .topBar{
       position:absolute;
-      top:18px;
+      top:14px;
       left:50%;
       transform:translateX(-50%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      z-index:10;
+      pointer-events:auto;
+      width:min(820px, 94vw);
+    }
+
+    .topBtns{
       display:flex;
       gap:18px;
       align-items:center;
       justify-content:center;
-      z-index:10;
-      pointer-events:auto;
     }
 
     .topBtnImg{
@@ -60,6 +67,42 @@
       display:block;
     }
     .topBtnImg:active{ transform:scale(0.985); }
+
+    /* instruction box under bubbles */
+    .instrWrap{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      position:relative;
+    }
+    .instr{
+      flex:1;
+      background:rgba(255,255,255,0.88);
+      border-radius:18px;
+      padding:12px 16px;
+      box-shadow:0 10px 18px rgba(0,0,0,0.14);
+      font-size:22px;
+      text-align:center;
+      line-height:1.2;
+      user-select:none;
+      min-height:34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .counter{
+      background:rgba(255,255,255,0.88);
+      border-radius:18px;
+      padding:10px 14px;
+      box-shadow:0 10px 18px rgba(0,0,0,0.14);
+      font-size:22px;
+      user-select:none;
+      min-width:92px;
+      text-align:center;
+      display:none; /* only game 1 */
+    }
 
     /* back button (small, bottom right) */
     .back{
@@ -85,7 +128,7 @@
       position:absolute;
       left:50%;
       transform:translateX(-50%);
-      top:140px;
+      top:170px;
       width:min(1180px, 94vw);
       display:grid;
       grid-template-columns:repeat(6, minmax(0, 1fr));
@@ -102,7 +145,8 @@
       cursor:pointer;
       display:grid;
       place-items:center;
-      transition:filter 120ms ease, transform 120ms ease, border-color 120ms ease;
+      transition:transform 120ms ease, border-color 120ms ease, opacity 120ms ease;
+      user-select:none;
     }
     .tile img{
       width:100%;
@@ -110,30 +154,61 @@
       object-fit:contain;
       filter:drop-shadow(0 10px 16px rgba(0,0,0,0.22));
       display:block;
+      pointer-events:none;
     }
     .tile:active{ transform:scale(0.99); }
 
-    .tile.good{ border-color: rgba(46,125,50,0.85); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
-    .tile.bad{  border-color: rgba(177,28,28,0.85); }
+    .tile.good{ border-color: rgba(46,125,50,0.90); }
+    .tile.bad{  border-color: rgba(177,28,28,0.90); }
+
+    /* completion popup */
+    .popup{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:20;
+      background:rgba(0,0,0,0.10);
+    }
+    .popupBox{
+      background:rgba(255,255,255,0.92);
+      border-radius:22px;
+      padding:18px 22px;
+      box-shadow:0 14px 28px rgba(0,0,0,0.22);
+      font-size:40px;
+      user-select:none;
+    }
 
     @media (max-width: 900px){
-      .g1Grid{ grid-template-columns:repeat(5, minmax(0,1fr)); top:130px; }
+      .g1Grid{ grid-template-columns:repeat(5, minmax(0,1fr)); top:160px; }
       .tile img{ height:86px; }
+      .instr{ font-size:20px; }
+      .counter{ font-size:20px; }
     }
     @media (max-width: 700px){
-      .g1Grid{ grid-template-columns:repeat(4, minmax(0,1fr)); top:118px; }
+      .g1Grid{ grid-template-columns:repeat(4, minmax(0,1fr)); top:150px; }
       .tile img{ height:80px; }
+      .popupBox{ font-size:34px; }
     }
 
     /* ---------- GAME 2 ---------- */
-    .g2Boxes{
+    .g2Area{
       position:absolute;
       left:50%;
-      transform:translateX(-50%);
-      top:140px;
+      top:50%;
+      transform:translate(-50%, -50%);
       width:min(1100px, 92vw);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+    }
+
+    .g2Boxes{
+      width:100%;
       display:grid;
-      grid-template-columns:repeat(3, 1fr);
+      grid-template-columns:repeat(2, 1fr);
       gap:18px;
       align-items:start;
       justify-items:stretch;
@@ -149,11 +224,11 @@
       position:relative;
       overflow:hidden;
       cursor:pointer;
+      user-select:none;
     }
 
     .boxTitle{
       font-size:26px;
-      letter-spacing:0.5px;
       margin:0 0 10px 6px;
       user-select:none;
     }
@@ -166,18 +241,14 @@
       min-height:160px;
     }
 
-    /* bottom row of images */
+    /* image row directly below boxes (still one row, but higher) */
     .g2Row{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:26px;
       width:min(1200px, 96vw);
       display:flex;
       gap:10px;
       align-items:center;
       justify-content:center;
-      flex-wrap:nowrap; /* one single row */
+      flex-wrap:nowrap;
       overflow:hidden;
       padding:0 6px;
       box-sizing:border-box;
@@ -192,13 +263,15 @@
       transition:transform 120ms ease, border-color 120ms ease, opacity 120ms ease;
       display:grid;
       place-items:center;
+      user-select:none;
     }
     .g2Item img{
-      width:66px;          /* adapted size to fit many */
-      height:66px;
+      width:58px;
+      height:58px;
       object-fit:contain;
       filter:drop-shadow(0 8px 14px rgba(0,0,0,0.22));
       display:block;
+      pointer-events:none;
     }
 
     .g2Item.selected{ border-color: rgba(0,0,0,0.25); }
@@ -206,23 +279,19 @@
     .g2Item:active{ transform:scale(0.985); }
 
     .miniInBox{
-      width:52px;
-      height:52px;
+      width:50px;
+      height:50px;
       object-fit:contain;
       filter:drop-shadow(0 6px 10px rgba(0,0,0,0.18));
     }
 
-    .pop{
-      animation:pop 220ms ease-out;
-    }
+    .pop{ animation:pop 220ms ease-out; }
     @keyframes pop{
       0%{ transform:scale(0.6); opacity:0.3; }
       100%{ transform:scale(1); opacity:1; }
     }
 
-    .wobble{
-      animation:wobble 260ms linear;
-    }
+    .wobble{ animation:wobble 260ms linear; }
     @keyframes wobble{
       0%{ transform:translateX(0); }
       25%{ transform:translateX(-6px); }
@@ -232,14 +301,14 @@
     }
 
     @media (max-width: 980px){
-      .g2Item img{ width:58px; height:58px; }
       .box{ min-height:200px; }
+      .g2Item img{ width:52px; height:52px; }
     }
     @media (max-width: 760px){
-      .g2Boxes{ top:120px; gap:12px; }
       .boxTitle{ font-size:22px; }
-      .g2Item img{ width:52px; height:52px; }
       .box{ min-height:185px; }
+      .g2Item img{ width:48px; height:48px; }
+      .instr{ font-size:18px; }
     }
   </style>
 </head>
@@ -247,25 +316,37 @@
 <body>
   <!-- MENU -->
   <div id="menu" class="screen active">
-    <div class="topBtns">
-      <button class="topBtnImg" id="btnGame1" aria-label="Spiel 1">
-        <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
-      </button>
-      <button class="topBtnImg" id="btnGame2" aria-label="Spiel 2">
-        <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
-      </button>
+    <div class="topBar">
+      <div class="topBtns">
+        <button class="topBtnImg" id="btnGame1" aria-label="Spiel 1">
+          <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
+        </button>
+        <button class="topBtnImg" id="btnGame2" aria-label="Spiel 2">
+          <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
+        </button>
+      </div>
+      <div class="instrWrap">
+        <div class="instr" id="instrMenu"></div>
+        <div class="counter" id="counterMenu"></div>
+      </div>
     </div>
   </div>
 
   <!-- GAME 1 -->
   <div id="game1" class="screen">
-    <div class="topBtns">
-      <button class="topBtnImg" id="btnGame1b" aria-label="Spiel 1">
-        <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
-      </button>
-      <button class="topBtnImg" id="btnGame2b" aria-label="Spiel 2">
-        <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
-      </button>
+    <div class="topBar">
+      <div class="topBtns">
+        <button class="topBtnImg" id="btnGame1b" aria-label="Spiel 1">
+          <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
+        </button>
+        <button class="topBtnImg" id="btnGame2b" aria-label="Spiel 2">
+          <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
+        </button>
+      </div>
+      <div class="instrWrap">
+        <div class="instr" id="instr1">Klicke auf alle Bilder mit dem Laut "sch".</div>
+        <div class="counter" id="counter1">0/14</div>
+      </div>
     </div>
 
     <button class="back" id="back1" aria-label="Zurück">
@@ -275,17 +356,27 @@
     </button>
 
     <div class="g1Grid" id="g1Grid"></div>
+
+    <div class="popup" id="popup1">
+      <div class="popupBox">fantastiSCH!</div>
+    </div>
   </div>
 
   <!-- GAME 2 -->
   <div id="game2" class="screen">
-    <div class="topBtns">
-      <button class="topBtnImg" id="btnGame1c" aria-label="Spiel 1">
-        <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
-      </button>
-      <button class="topBtnImg" id="btnGame2c" aria-label="Spiel 2">
-        <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
-      </button>
+    <div class="topBar">
+      <div class="topBtns">
+        <button class="topBtnImg" id="btnGame1c" aria-label="Spiel 1">
+          <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
+        </button>
+        <button class="topBtnImg" id="btnGame2c" aria-label="Spiel 2">
+          <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
+        </button>
+      </div>
+      <div class="instrWrap">
+        <div class="instr" id="instr2">Wo hörst du "sch"? Vorne oder in der Mitte?</div>
+        <div class="counter" id="counter2"></div>
+      </div>
     </div>
 
     <button class="back" id="back2" aria-label="Zurück">
@@ -294,30 +385,27 @@
       </svg>
     </button>
 
-    <div class="g2Boxes">
-      <div class="box" data-box="vorne" id="boxVorne">
-        <div class="boxTitle">Vorne</div>
-        <div class="boxInner" id="innerVorne"></div>
+    <div class="g2Area">
+      <div class="g2Boxes">
+        <div class="box" data-box="vorne" id="boxVorne">
+          <div class="boxTitle">Vorne</div>
+          <div class="boxInner" id="innerVorne"></div>
+        </div>
+
+        <div class="box" data-box="mitte" id="boxMitte">
+          <div class="boxTitle">Mitte</div>
+          <div class="boxInner" id="innerMitte"></div>
+        </div>
       </div>
 
-      <div class="box" data-box="mitte" id="boxMitte">
-        <div class="boxTitle">Mitte</div>
-        <div class="boxInner" id="innerMitte"></div>
-      </div>
-
-      <div class="box" data-box="hinten" id="boxHinten">
-        <div class="boxTitle">Hinten</div>
-        <div class="boxInner" id="innerHinten"></div>
-      </div>
+      <div class="g2Row" id="g2Row"></div>
     </div>
-
-    <div class="g2Row" id="g2Row"></div>
   </div>
 
 <script>
   const AUDIO_BASE = "https://github.com/albrechtclaire1007/winter/raw/refs/heads/main/";
 
-  // All images (as you provided earlier)
+  // All images
   const ALL_ITEMS = [
     { key:"berge", img:"https://i.postimg.cc/CBHV4ZwK/berge.png" },
     { key:"decken", img:"https://i.postimg.cc/zHzY2JfJ/decken.png" },
@@ -350,16 +438,16 @@
     { key:"wintermantel", img:"https://i.postimg.cc/vcmdWHjW/wintermantel.png" }
   ];
 
-  // GAME 1: /sch/ sound words (by sound) -> green if "sch" sound is heard
-  // includes Ski and Stiefel (as requested)
+  // GAME 1: words where the /sch/ sound is heard (including Wärmeflasche)
   const SCH_SOUND = new Set([
     "schal","schlitten","schlittschuhe","schneeball","schneeeule","schneeflocke","schneekugel","schneemann","schneeschaufel",
     "handschuhe","hausschuhe",
-    "ski","stiefel"
+    "ski","stiefel",
+    "waermeflasche"
   ]);
+  const TOTAL_SCH = 14;
 
-  // GAME 2: only /sch/ sound items, and position (sound position)
-  // (kept unambiguous: no "Schlittschuhe" because /sch/ appears more than once)
+  // GAME 2: only /sch/ sound items, position: vorne / mitte (include Wärmeflasche)
   const SCH_POSITION_ITEMS = [
     { key:"schal", img:"https://i.postimg.cc/7bw4ZNNy/schal.png", pos:"vorne" },
     { key:"schlitten", img:"https://i.postimg.cc/QVhDdqqZ/schlitten.png", pos:"vorne" },
@@ -369,42 +457,74 @@
     { key:"schneekugel", img:"https://i.postimg.cc/3WYhxZZy/schneekugel.png", pos:"vorne" },
     { key:"schneemann", img:"https://i.postimg.cc/Rq4mZTTn/schneemann.png", pos:"vorne" },
     { key:"schneeschaufel", img:"https://i.postimg.cc/w32pysWj/schneeschaufel.png", pos:"vorne" },
+    { key:"ski", img:"https://i.postimg.cc/Cd7gBfvd/ski.png", pos:"vorne" },
+    { key:"stiefel", img:"https://i.postimg.cc/grsWX6MV/stiefel.png", pos:"vorne" },
+
     { key:"handschuhe", img:"https://i.postimg.cc/Mf6J3WGx/handschuhe.png", pos:"mitte" },
     { key:"hausschuhe", img:"https://i.postimg.cc/7JHrtxLb/hausschuhe.png", pos:"mitte" },
-    { key:"ski", img:"https://i.postimg.cc/Cd7gBfvd/ski.png", pos:"vorne" },     // /sch/ sound at start
-    { key:"stiefel", img:"https://i.postimg.cc/grsWX6MV/stiefel.png", pos:"vorne" } // /scht/ sound at start
-    // "Hinten" is available as a box, but for this winter set there are no clear /sch/ end words.
-    // If you add one later (e.g., "Fisch"), just add pos:"hinten".
+    { key:"waermeflasche", img:"https://i.postimg.cc/XXLbGy2s/waermeflasche.png", pos:"mitte" }
   ];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
 
   function playAudio(key){
     const a = new Audio(`${AUDIO_BASE}${key}.mp3`);
     a.play().catch(()=>{});
   }
 
-  // screen control
+  // screens
   const menu = document.getElementById("menu");
   const game1 = document.getElementById("game1");
   const game2 = document.getElementById("game2");
+
+  const instrMenu = document.getElementById("instrMenu");
+  instrMenu.textContent = ""; // menu stays minimal
+
+  const counter1 = document.getElementById("counter1");
+  const popup1 = document.getElementById("popup1");
 
   const show = (el)=>{
     [menu, game1, game2].forEach(x=>x.classList.remove("active"));
     el.classList.add("active");
   };
 
-  // menu buttons
   const bindNav = (id, fn)=>document.getElementById(id).addEventListener("click", fn);
-  bindNav("btnGame1", ()=>show(game1));
-  bindNav("btnGame2", ()=>show(game2));
-  bindNav("btnGame1b", ()=>show(game1));
-  bindNav("btnGame2b", ()=>show(game2));
-  bindNav("btnGame1c", ()=>show(game1));
-  bindNav("btnGame2c", ()=>show(game2));
+  bindNav("btnGame1", ()=>{ resetGame1(); show(game1); });
+  bindNav("btnGame2", ()=>{ resetGame2(); show(game2); });
+
+  bindNav("btnGame1b", ()=>{ resetGame1(); show(game1); });
+  bindNav("btnGame2b", ()=>{ resetGame2(); show(game2); });
+
+  bindNav("btnGame1c", ()=>{ resetGame1(); show(game1); });
+  bindNav("btnGame2c", ()=>{ resetGame2(); show(game2); });
+
   bindNav("back1", ()=>show(menu));
   bindNav("back2", ()=>show(menu));
 
+  // popup close on click
+  popup1.addEventListener("click", ()=>{ popup1.style.display = "none"; });
+
   /* ---------------- GAME 1 ---------------- */
   const g1Grid = document.getElementById("g1Grid");
+  let foundSet = new Set();
+
+  function setCounter(){
+    counter1.textContent = `${foundSet.size}/${TOTAL_SCH}`;
+  }
+
+  function resetGame1(){
+    foundSet = new Set();
+    setCounter();
+    popup1.style.display = "none";
+    buildGame1();
+  }
 
   function buildGame1(){
     g1Grid.innerHTML = "";
@@ -414,12 +534,23 @@
       tile.type = "button";
       tile.dataset.key = item.key;
       tile.innerHTML = `<img src="${item.img}" alt="">`;
+
       tile.addEventListener("click", ()=>{
         playAudio(item.key);
         tile.classList.remove("good","bad");
-        if(SCH_SOUND.has(item.key)) tile.classList.add("good");
-        else tile.classList.add("bad");
+
+        const isSch = SCH_SOUND.has(item.key);
+        tile.classList.add(isSch ? "good" : "bad");
+
+        if(isSch && !foundSet.has(item.key)){
+          foundSet.add(item.key);
+          setCounter();
+          if(foundSet.size === TOTAL_SCH){
+            popup1.style.display = "flex";
+          }
+        }
       });
+
       g1Grid.appendChild(tile);
     });
   }
@@ -428,7 +559,6 @@
   const g2Row = document.getElementById("g2Row");
   const innerVorne = document.getElementById("innerVorne");
   const innerMitte = document.getElementById("innerMitte");
-  const innerHinten = document.getElementById("innerHinten");
 
   let selectedKey = null;
 
@@ -440,77 +570,76 @@
   }
 
   function boxInner(pos){
-    if(pos === "vorne") return innerVorne;
-    if(pos === "mitte") return innerMitte;
-    return innerHinten;
+    return (pos === "vorne") ? innerVorne : innerMitte;
+  }
+
+  function resetGame2(){
+    selectedKey = null;
+    innerVorne.innerHTML = "";
+    innerMitte.innerHTML = "";
+    buildGame2();
   }
 
   function buildGame2(){
-    // reset
     g2Row.innerHTML = "";
-    innerVorne.innerHTML = "";
-    innerMitte.innerHTML = "";
-    innerHinten.innerHTML = "";
-    selectedKey = null;
 
-    // row items
-    SCH_POSITION_ITEMS.forEach(item=>{
+    // randomized order (more mixed)
+    const items = shuffle(SCH_POSITION_ITEMS);
+
+    items.forEach(item=>{
       const btn = document.createElement("button");
       btn.className = "g2Item";
       btn.type = "button";
       btn.dataset.key = item.key;
       btn.dataset.pos = item.pos;
       btn.innerHTML = `<img src="${item.img}" alt="">`;
+
       btn.addEventListener("click", ()=>{
         if(btn.classList.contains("done")) return;
-        // select
+
         [...g2Row.querySelectorAll(".g2Item")].forEach(x=>x.classList.remove("selected"));
         btn.classList.add("selected");
         selectedKey = item.key;
-        // play sound on select (helps)
+
         playAudio(item.key);
       });
+
       g2Row.appendChild(btn);
-    });
-
-    // box click logic
-    ["boxVorne","boxMitte","boxHinten"].forEach(boxId=>{
-      const box = document.getElementById(boxId);
-      box.addEventListener("click", ()=>{
-        if(!selectedKey) return;
-
-        const selectedBtn = g2Row.querySelector(`.g2Item[data-key="${selectedKey}"]`);
-        if(!selectedBtn || selectedBtn.classList.contains("done")) return;
-
-        const correctPos = selectedBtn.dataset.pos;
-        const clickedPos = box.dataset.box;
-
-        if(correctPos === clickedPos){
-          // clone into box
-          const imgSrc = selectedBtn.querySelector("img").src;
-          const clone = document.createElement("img");
-          clone.src = imgSrc;
-          clone.className = "miniInBox pop";
-          boxInner(clickedPos).appendChild(clone);
-
-          // mark done
-          selectedBtn.classList.remove("selected");
-          selectedBtn.classList.add("done");
-          selectedKey = null;
-        } else {
-          wobble(selectedBtn);
-        }
-      });
     });
   }
 
-  buildGame1();
-  buildGame2();
+  // box click logic
+  ["boxVorne","boxMitte"].forEach(boxId=>{
+    const box = document.getElementById(boxId);
+    box.addEventListener("click", ()=>{
+      if(!selectedKey) return;
 
-  // optional: when switching to game2, rebuild to reset
-  document.getElementById("btnGame2").addEventListener("click", buildGame2);
-  document.getElementById("btnGame2b").addEventListener("click", buildGame2);
-  document.getElementById("btnGame2c").addEventListener("click", buildGame2);
+      const selectedBtn = g2Row.querySelector(`.g2Item[data-key="${selectedKey}"]`);
+      if(!selectedBtn || selectedBtn.classList.contains("done")) return;
+
+      const correctPos = selectedBtn.dataset.pos;
+      const clickedPos = box.dataset.box;
+
+      if(correctPos === clickedPos){
+        const imgSrc = selectedBtn.querySelector("img").src;
+        const clone = document.createElement("img");
+        clone.src = imgSrc;
+        clone.className = "miniInBox pop";
+        boxInner(clickedPos).appendChild(clone);
+
+        selectedBtn.classList.remove("selected");
+        selectedBtn.classList.add("done");
+        selectedKey = null;
+      } else {
+        wobble(selectedBtn);
+      }
+    });
+  });
+
+  // initial build
+  resetGame1();
+  resetGame2();
 </script>
 </body>
 </html>
+
