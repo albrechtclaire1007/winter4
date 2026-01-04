@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sch – Spiele</title>
+
+  <style>
+    @font-face{
+      font-family:"Louisville";
+      src:url("https://github.com/albrechtclaire1007/winter4/raw/refs/heads/main/LouisvilleIi-Regular.otf") format("opentype");
+      font-display:swap;
+    }
+
+    html, body { height:100%; margin:0; }
+    body{
+      background:#eaf2ff url("https://i.postimg.cc/BbCyMf2N/winter-background.png") no-repeat center top;
+      background-size:contain;   /* fully visible */
+      overflow:hidden;
+      font-family:"Louisville", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* shared */
+    .screen{
+      position:absolute;
+      inset:0;
+      display:none;
+    }
+    .screen.active{ display:block; }
+
+    /* top menu buttons (center top) */
+    .topBtns{
+      position:absolute;
+      top:18px;
+      left:50%;
+      transform:translateX(-50%);
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:center;
+      z-index:10;
+      pointer-events:auto;
+    }
+
+    .topBtnImg{
+      border:0;
+      background:transparent;
+      padding:0;
+      cursor:pointer;
+      width:84px;
+      height:84px;
+      display:grid;
+      place-items:center;
+      filter:drop-shadow(0 10px 14px rgba(0,0,0,0.20));
+    }
+    .topBtnImg img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+    .topBtnImg:active{ transform:scale(0.985); }
+
+    /* back button (small, bottom right) */
+    .back{
+      position:absolute;
+      right:14px;
+      bottom:14px;
+      width:56px;
+      height:56px;
+      border-radius:999px;
+      border:0;
+      cursor:pointer;
+      background:rgba(255,255,255,0.80);
+      box-shadow:0 12px 22px rgba(0,0,0,0.22);
+      display:grid;
+      place-items:center;
+      z-index:10;
+    }
+    .back:active{ transform:scale(0.98); }
+    .back svg{ width:26px; height:26px; opacity:0.85; }
+
+    /* ---------- GAME 1 ---------- */
+    .g1Grid{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:140px;
+      width:min(1180px, 94vw);
+      display:grid;
+      grid-template-columns:repeat(6, minmax(0, 1fr));
+      gap:12px;
+      align-items:stretch;
+      justify-items:stretch;
+    }
+
+    .tile{
+      background:rgba(255,255,255,0.0);
+      border-radius:18px;
+      border:4px solid rgba(255,255,255,0.0);
+      padding:8px;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      transition:filter 120ms ease, transform 120ms ease, border-color 120ms ease;
+    }
+    .tile img{
+      width:100%;
+      height:95px;
+      object-fit:contain;
+      filter:drop-shadow(0 10px 16px rgba(0,0,0,0.22));
+      display:block;
+    }
+    .tile:active{ transform:scale(0.99); }
+
+    .tile.good{ border-color: rgba(46,125,50,0.85); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+    .tile.bad{  border-color: rgba(177,28,28,0.85); }
+
+    @media (max-width: 900px){
+      .g1Grid{ grid-template-columns:repeat(5, minmax(0,1fr)); top:130px; }
+      .tile img{ height:86px; }
+    }
+    @media (max-width: 700px){
+      .g1Grid{ grid-template-columns:repeat(4, minmax(0,1fr)); top:118px; }
+      .tile img{ height:80px; }
+    }
+
+    /* ---------- GAME 2 ---------- */
+    .g2Boxes{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:140px;
+      width:min(1100px, 92vw);
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:18px;
+      align-items:start;
+      justify-items:stretch;
+    }
+
+    .box{
+      background:rgba(255,255,255,0.88);
+      border-radius:20px;
+      min-height:220px;
+      box-shadow:0 10px 18px rgba(0,0,0,0.14);
+      padding:12px 12px 10px;
+      box-sizing:border-box;
+      position:relative;
+      overflow:hidden;
+      cursor:pointer;
+    }
+
+    .boxTitle{
+      font-size:26px;
+      letter-spacing:0.5px;
+      margin:0 0 10px 6px;
+      user-select:none;
+    }
+
+    .boxInner{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-content:flex-start;
+      min-height:160px;
+    }
+
+    /* bottom row of images */
+    .g2Row{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:26px;
+      width:min(1200px, 96vw);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:nowrap; /* one single row */
+      overflow:hidden;
+      padding:0 6px;
+      box-sizing:border-box;
+    }
+
+    .g2Item{
+      border:3px solid rgba(255,255,255,0.0);
+      border-radius:16px;
+      padding:6px;
+      background:rgba(255,255,255,0.0);
+      cursor:pointer;
+      transition:transform 120ms ease, border-color 120ms ease, opacity 120ms ease;
+      display:grid;
+      place-items:center;
+    }
+    .g2Item img{
+      width:66px;          /* adapted size to fit many */
+      height:66px;
+      object-fit:contain;
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,0.22));
+      display:block;
+    }
+
+    .g2Item.selected{ border-color: rgba(0,0,0,0.25); }
+    .g2Item.done{ opacity:0.45; cursor:default; }
+    .g2Item:active{ transform:scale(0.985); }
+
+    .miniInBox{
+      width:52px;
+      height:52px;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,0.18));
+    }
+
+    .pop{
+      animation:pop 220ms ease-out;
+    }
+    @keyframes pop{
+      0%{ transform:scale(0.6); opacity:0.3; }
+      100%{ transform:scale(1); opacity:1; }
+    }
+
+    .wobble{
+      animation:wobble 260ms linear;
+    }
+    @keyframes wobble{
+      0%{ transform:translateX(0); }
+      25%{ transform:translateX(-6px); }
+      50%{ transform:translateX(6px); }
+      75%{ transform:translateX(-4px); }
+      100%{ transform:translateX(0); }
+    }
+
+    @media (max-width: 980px){
+      .g2Item img{ width:58px; height:58px; }
+      .box{ min-height:200px; }
+    }
+    @media (max-width: 760px){
+      .g2Boxes{ top:120px; gap:12px; }
+      .boxTitle{ font-size:22px; }
+      .g2Item img{ width:52px; height:52px; }
+      .box{ min-height:185px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- MENU -->
+  <div id="menu" class="screen active">
+    <div class="topBtns">
+      <button class="topBtnImg" id="btnGame1" aria-label="Spiel 1">
+        <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
+      </button>
+      <button class="topBtnImg" id="btnGame2" aria-label="Spiel 2">
+        <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
+      </button>
+    </div>
+  </div>
+
+  <!-- GAME 1 -->
+  <div id="game1" class="screen">
+    <div class="topBtns">
+      <button class="topBtnImg" id="btnGame1b" aria-label="Spiel 1">
+        <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
+      </button>
+      <button class="topBtnImg" id="btnGame2b" aria-label="Spiel 2">
+        <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
+      </button>
+    </div>
+
+    <button class="back" id="back1" aria-label="Zurück">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <div class="g1Grid" id="g1Grid"></div>
+  </div>
+
+  <!-- GAME 2 -->
+  <div id="game2" class="screen">
+    <div class="topBtns">
+      <button class="topBtnImg" id="btnGame1c" aria-label="Spiel 1">
+        <img src="https://i.postimg.cc/qtgDKnYS/1.png" alt="">
+      </button>
+      <button class="topBtnImg" id="btnGame2c" aria-label="Spiel 2">
+        <img src="https://i.postimg.cc/xkqpmHhD/2.png" alt="">
+      </button>
+    </div>
+
+    <button class="back" id="back2" aria-label="Zurück">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <div class="g2Boxes">
+      <div class="box" data-box="vorne" id="boxVorne">
+        <div class="boxTitle">Vorne</div>
+        <div class="boxInner" id="innerVorne"></div>
+      </div>
+
+      <div class="box" data-box="mitte" id="boxMitte">
+        <div class="boxTitle">Mitte</div>
+        <div class="boxInner" id="innerMitte"></div>
+      </div>
+
+      <div class="box" data-box="hinten" id="boxHinten">
+        <div class="boxTitle">Hinten</div>
+        <div class="boxInner" id="innerHinten"></div>
+      </div>
+    </div>
+
+    <div class="g2Row" id="g2Row"></div>
+  </div>
+
+<script>
+  const AUDIO_BASE = "https://github.com/albrechtclaire1007/winter/raw/refs/heads/main/";
+
+  // All images (as you provided earlier)
+  const ALL_ITEMS = [
+    { key:"berge", img:"https://i.postimg.cc/CBHV4ZwK/berge.png" },
+    { key:"decken", img:"https://i.postimg.cc/zHzY2JfJ/decken.png" },
+    { key:"eisbaer", img:"https://i.postimg.cc/JHrCY1hM/eisbaer.png" },
+    { key:"eiszapfen", img:"https://i.postimg.cc/BPSf7qv3/eiszapfen.png" },
+    { key:"handschuhe", img:"https://i.postimg.cc/Mf6J3WGx/handschuhe.png" },
+    { key:"hausschuhe", img:"https://i.postimg.cc/7JHrtxLb/hausschuhe.png" },
+    { key:"iglu", img:"https://i.postimg.cc/9wmHgWfq/iglu.png" },
+    { key:"kakao", img:"https://i.postimg.cc/K3GhpZYK/kakao.png" },
+    { key:"kamin", img:"https://i.postimg.cc/CnhprFK8/kamin.png" },
+    { key:"kerze", img:"https://i.postimg.cc/vxYw2Qmt/kerze.png" },
+    { key:"muetze", img:"https://i.postimg.cc/3WYhxZFf/muetze.png" },
+    { key:"pinguin", img:"https://i.postimg.cc/fkDsRvfg/pinguin.png" },
+    { key:"pullover", img:"https://i.postimg.cc/grmp2KHf/pullover.png" },
+    { key:"schal", img:"https://i.postimg.cc/7bw4ZNNy/schal.png" },
+    { key:"schlitten", img:"https://i.postimg.cc/QVhDdqqZ/schlitten.png" },
+    { key:"schlittschuhe", img:"https://i.postimg.cc/4nsGx11N/schlittschuhe.png" },
+    { key:"schneeball", img:"https://i.postimg.cc/Thfx3cc2/schneeball.png" },
+    { key:"schneeeule", img:"https://i.postimg.cc/s1szgJJg/schneeeule.png" },
+    { key:"schneeflocke", img:"https://i.postimg.cc/14sS3KKt/schneeflocke.png" },
+    { key:"schneekugel", img:"https://i.postimg.cc/3WYhxZZy/schneekugel.png" },
+    { key:"schneemann", img:"https://i.postimg.cc/Rq4mZTTn/schneemann.png" },
+    { key:"schneeschaufel", img:"https://i.postimg.cc/w32pysWj/schneeschaufel.png" },
+    { key:"ski", img:"https://i.postimg.cc/Cd7gBfvd/ski.png" },
+    { key:"socken", img:"https://i.postimg.cc/Cd7gBfvb/socken.png" },
+    { key:"stiefel", img:"https://i.postimg.cc/grsWX6MV/stiefel.png" },
+    { key:"tanne", img:"https://i.postimg.cc/qgwThCmX/tanne.png" },
+    { key:"vogel", img:"https://i.postimg.cc/JtxLDBTq/vogel.png" },
+    { key:"waermeflasche", img:"https://i.postimg.cc/XXLbGy2s/waermeflasche.png" },
+    { key:"wintermantel", img:"https://i.postimg.cc/vcmdWHjW/wintermantel.png" }
+  ];
+
+  // GAME 1: /sch/ sound words (by sound) -> green if "sch" sound is heard
+  // includes Ski and Stiefel (as requested)
+  const SCH_SOUND = new Set([
+    "schal","schlitten","schlittschuhe","schneeball","schneeeule","schneeflocke","schneekugel","schneemann","schneeschaufel",
+    "handschuhe","hausschuhe",
+    "ski","stiefel"
+  ]);
+
+  // GAME 2: only /sch/ sound items, and position (sound position)
+  // (kept unambiguous: no "Schlittschuhe" because /sch/ appears more than once)
+  const SCH_POSITION_ITEMS = [
+    { key:"schal", img:"https://i.postimg.cc/7bw4ZNNy/schal.png", pos:"vorne" },
+    { key:"schlitten", img:"https://i.postimg.cc/QVhDdqqZ/schlitten.png", pos:"vorne" },
+    { key:"schneeball", img:"https://i.postimg.cc/Thfx3cc2/schneeball.png", pos:"vorne" },
+    { key:"schneeeule", img:"https://i.postimg.cc/s1szgJJg/schneeeule.png", pos:"vorne" },
+    { key:"schneeflocke", img:"https://i.postimg.cc/14sS3KKt/schneeflocke.png", pos:"vorne" },
+    { key:"schneekugel", img:"https://i.postimg.cc/3WYhxZZy/schneekugel.png", pos:"vorne" },
+    { key:"schneemann", img:"https://i.postimg.cc/Rq4mZTTn/schneemann.png", pos:"vorne" },
+    { key:"schneeschaufel", img:"https://i.postimg.cc/w32pysWj/schneeschaufel.png", pos:"vorne" },
+    { key:"handschuhe", img:"https://i.postimg.cc/Mf6J3WGx/handschuhe.png", pos:"mitte" },
+    { key:"hausschuhe", img:"https://i.postimg.cc/7JHrtxLb/hausschuhe.png", pos:"mitte" },
+    { key:"ski", img:"https://i.postimg.cc/Cd7gBfvd/ski.png", pos:"vorne" },     // /sch/ sound at start
+    { key:"stiefel", img:"https://i.postimg.cc/grsWX6MV/stiefel.png", pos:"vorne" } // /scht/ sound at start
+    // "Hinten" is available as a box, but for this winter set there are no clear /sch/ end words.
+    // If you add one later (e.g., "Fisch"), just add pos:"hinten".
+  ];
+
+  function playAudio(key){
+    const a = new Audio(`${AUDIO_BASE}${key}.mp3`);
+    a.play().catch(()=>{});
+  }
+
+  // screen control
+  const menu = document.getElementById("menu");
+  const game1 = document.getElementById("game1");
+  const game2 = document.getElementById("game2");
+
+  const show = (el)=>{
+    [menu, game1, game2].forEach(x=>x.classList.remove("active"));
+    el.classList.add("active");
+  };
+
+  // menu buttons
+  const bindNav = (id, fn)=>document.getElementById(id).addEventListener("click", fn);
+  bindNav("btnGame1", ()=>show(game1));
+  bindNav("btnGame2", ()=>show(game2));
+  bindNav("btnGame1b", ()=>show(game1));
+  bindNav("btnGame2b", ()=>show(game2));
+  bindNav("btnGame1c", ()=>show(game1));
+  bindNav("btnGame2c", ()=>show(game2));
+  bindNav("back1", ()=>show(menu));
+  bindNav("back2", ()=>show(menu));
+
+  /* ---------------- GAME 1 ---------------- */
+  const g1Grid = document.getElementById("g1Grid");
+
+  function buildGame1(){
+    g1Grid.innerHTML = "";
+    ALL_ITEMS.forEach(item=>{
+      const tile = document.createElement("button");
+      tile.className = "tile";
+      tile.type = "button";
+      tile.dataset.key = item.key;
+      tile.innerHTML = `<img src="${item.img}" alt="">`;
+      tile.addEventListener("click", ()=>{
+        playAudio(item.key);
+        tile.classList.remove("good","bad");
+        if(SCH_SOUND.has(item.key)) tile.classList.add("good");
+        else tile.classList.add("bad");
+      });
+      g1Grid.appendChild(tile);
+    });
+  }
+
+  /* ---------------- GAME 2 ---------------- */
+  const g2Row = document.getElementById("g2Row");
+  const innerVorne = document.getElementById("innerVorne");
+  const innerMitte = document.getElementById("innerMitte");
+  const innerHinten = document.getElementById("innerHinten");
+
+  let selectedKey = null;
+
+  function wobble(el){
+    el.classList.remove("wobble");
+    void el.offsetWidth;
+    el.classList.add("wobble");
+    setTimeout(()=>el.classList.remove("wobble"), 280);
+  }
+
+  function boxInner(pos){
+    if(pos === "vorne") return innerVorne;
+    if(pos === "mitte") return innerMitte;
+    return innerHinten;
+  }
+
+  function buildGame2(){
+    // reset
+    g2Row.innerHTML = "";
+    innerVorne.innerHTML = "";
+    innerMitte.innerHTML = "";
+    innerHinten.innerHTML = "";
+    selectedKey = null;
+
+    // row items
+    SCH_POSITION_ITEMS.forEach(item=>{
+      const btn = document.createElement("button");
+      btn.className = "g2Item";
+      btn.type = "button";
+      btn.dataset.key = item.key;
+      btn.dataset.pos = item.pos;
+      btn.innerHTML = `<img src="${item.img}" alt="">`;
+      btn.addEventListener("click", ()=>{
+        if(btn.classList.contains("done")) return;
+        // select
+        [...g2Row.querySelectorAll(".g2Item")].forEach(x=>x.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedKey = item.key;
+        // play sound on select (helps)
+        playAudio(item.key);
+      });
+      g2Row.appendChild(btn);
+    });
+
+    // box click logic
+    ["boxVorne","boxMitte","boxHinten"].forEach(boxId=>{
+      const box = document.getElementById(boxId);
+      box.addEventListener("click", ()=>{
+        if(!selectedKey) return;
+
+        const selectedBtn = g2Row.querySelector(`.g2Item[data-key="${selectedKey}"]`);
+        if(!selectedBtn || selectedBtn.classList.contains("done")) return;
+
+        const correctPos = selectedBtn.dataset.pos;
+        const clickedPos = box.dataset.box;
+
+        if(correctPos === clickedPos){
+          // clone into box
+          const imgSrc = selectedBtn.querySelector("img").src;
+          const clone = document.createElement("img");
+          clone.src = imgSrc;
+          clone.className = "miniInBox pop";
+          boxInner(clickedPos).appendChild(clone);
+
+          // mark done
+          selectedBtn.classList.remove("selected");
+          selectedBtn.classList.add("done");
+          selectedKey = null;
+        } else {
+          wobble(selectedBtn);
+        }
+      });
+    });
+  }
+
+  buildGame1();
+  buildGame2();
+
+  // optional: when switching to game2, rebuild to reset
+  document.getElementById("btnGame2").addEventListener("click", buildGame2);
+  document.getElementById("btnGame2b").addEventListener("click", buildGame2);
+  document.getElementById("btnGame2c").addEventListener("click", buildGame2);
+</script>
+</body>
+</html>
